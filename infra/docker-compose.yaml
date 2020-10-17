@@ -1,0 +1,53 @@
+version: '3.8'
+services:
+  php:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: php
+    hostname: php
+    ports:
+      - 80:80
+    volumes:
+      - ../app:/var/www/html
+      - /srv/private/Photos:/srv/private/Photos
+      - /home/szabacsik/test/:/home/szabacsik/test
+    networks:
+      - backendNetwork
+    depends_on:
+      - db
+    environment:
+      MYSQL_HOST: db
+      MYSQL_PORT: 3306
+      MYSQL_USER: root
+      MYSQL_PASSWORD: PASSWORD
+  db:
+    image: mysql/mysql-server:latest
+    container_name: db
+    hostname: db
+    ports:
+      - 127.0.0.1:3306:3306
+    volumes:
+      - ../../db:/var/lib/mysql
+    networks:
+      - backendNetwork
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: PASSWORD
+      MYSQL_ROOT_HOST: "%"
+      TZ: "Europe/Budapest"
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: phpmyadmin
+    hostname: phpmyadmin
+    ports:
+      - 8080:80
+    networks:
+      - backendNetwork
+    depends_on:
+      - db
+    environment:
+      PMA_HOST: db
+networks:
+  backendNetwork:
+    name: backend_network
